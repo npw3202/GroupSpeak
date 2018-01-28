@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+		<script>
+		//get JQUERY
+		var script = document.createElement("SCRIPT");
+	    script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js';
+	    script.type = 'text/javascript';
+		var JQ_loaded = false;
+
+	    script.onload = function() {
+	        var $ = window.jQuery;
+	        if(id != -1){
+	        	$('#idlabel').text('id: '+id);
+	        	JQ_loaded = true;
+	        }else{
+	        	JQ_loaded = true;
+	        }
+	    };
+	    document.getElementsByTagName("head")[0].appendChild(script);
+	    
+		var socket = io.connect('http://54.175.7.168:8081');
+		var id = -1;
+		var host_id = -1;
+		socket.on('connect', function () {
+			socket.emit('new_id')
+
+		    socket.on('id_save', function (msg) {
+		    	console.log("saving")
+		    	if(id == -1){
+			    	id = msg.id
+			    	if(JQ_loaded){
+				    	$('#idlabel').text('id: '+id);
+			    	}else{
+			    		document.getElementById('idlabel').innerHTML = "id: " + id
+			    	}
+			    	
+		    	}
+		    });
+		    socket.on('message', function (msg) {
+		      console.log(msg);
+		    });
+		});
+		function submit(){
+			server_id = $('#server_name').val()
+			socket.emit('connect_to_server', {client: id, server:server_id})
+		}
+		</script>
+	</head>
+	<label id="idlabel">id: </label>
+	<br>
+	Server: <input type="text" id="server_name">
+	<button onclick="submit()">submit</button>
+</html>
